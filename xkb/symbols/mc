@@ -1,0 +1,30 @@
+default partial alphanumeric_keys modifier_keys
+xkb_symbols "basic" {
+    name[Group1]= "Minecraft Remap";
+    include "us"
+    // Números remapeados
+    key <AE01>  {[ f, F ]};
+    key <AE02>  {[ q, Q ]};
+    key <AE03>  {[ l, L ]};
+    key <AE04>  {[ m, M ]};
+
+    // QWER → i e s n
+    key <AD01>  {[ i, I ]};
+    key <AD02>  {[ e, E ]};
+    key <AD03>  {[ s, S ]};
+    key <AD04>  {[ n, N ]};
+
+    // ASDFG → a p d t h
+    key <AC01>  {[ a, A ]};
+    key <AC02>  {[ p, P ]};
+    key <AC03>  {[ d, D ]};
+    key <AC04>  {[ t, T ]};
+    key <AC05>  {[ h, H ]};
+
+    // ZXCV → m b w BackSpace
+    key <AB01>  {[ m, M ]};
+    key <AB02>  {[ b, B ]};
+    key <AB03>  {[ w, W ]};
+    key <AB04>  {[ v, V ]};
+};
+

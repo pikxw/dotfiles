@@ -1,0 +1,100 @@
+* {
+    font-family: "JetBrainsMono Nerd Font";
+    font-weight: bold;
+    font-size: 14px;
+    min-height: 0;
+}
+
+window#waybar {
+    background: transparent;
+    /* main window transparent background */
+}
+
+tooltip {
+    font-family: inherit;
+    background: #15161e;
+    /* tooltip background */
+    border: 2px solid #c0caf5;
+    /* tooltip border size and color */
+    border-radius: 5px;
+    /* tooltip rounded corners */
+}
+
+/*#workspaces button*/
+#mpris,
+#privacy-item,
+#bluetooth,
+#clock,
+#tray,
+#cpu,
+#memory,
+#pulseaudio,
+#gamemode,
+#custom-launcher,
+#custom-updates {
+    /*text-shadow: 1px 1px 2px rgb(0, 0, 0);*/
+    /* text shadow, offset-x | offset-y | blur-radius | color */
+    background: #292c3c; /*#15161e default*/
+    /* background color */
+    margin: 10px 4px 4px 4px;
+    /* empty spaces around */
+    padding: 4px 10px;
+    /* extend pill size, vertical then horizontal */
+    box-shadow: 1px 1px 2px 1px rgba(0, 0, 0, 0.185);
+    /* pill background shadows */
+    border-radius: 8px; /*Default 5*/
+    /* rounded corners */
+    color: #bd93f9;
+}
+
+/* extend empty space on both side of the bar,
+ * value from ~/.config/hypr/hyprland.conf
+ * gaps_out (8px) + border size (2px) = 10px */
+
+#clock {
+    padding-right: 5px;
+}
+
+#privacy-item {
+    background: #e64553;
+    color: #15161e;
+}
+
+/**#tray menu {
+    font-weight: bold;
+}**/
+#workspaces {
+    background: #292c3c; /*#15161e default*/
+    /* background color */
+    margin: 10px 4px 4px 4px;
+    /* empty spaces around */
+    padding: 4px 10px;
+    /* extend pill size, vertical then horizontal */
+    box-shadow: 1px 1px 2px 1px rgba(0, 0, 0, 0.185);
+    /* pill background shadows */
+
+    /* tooltip border size and color */
+    border-radius: 8px;
+    /* rounded corners */
+    color: #bd93f9;
+}
+
+#workspaces button {
+    background: transparent;
+    color: #bd93f9;
+
+}
+
+#workspaces button.active {
+    background: #bd93f9;
+    color: #15161e;
+}
+
+#workspaces button:hover {
+    background: rgba(189, 147, 249, 0.2);
+}
+@keyframes blink {
+    to {
+        background-color: #e64553;
+    }
+}
