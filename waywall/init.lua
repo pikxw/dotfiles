@@ -1,50 +1,29 @@
 local waywall = require("waywall")
 local helpers = require("waywall.helpers")
 
-os.execute("export LD_PRELOAD=/usr/lib/libjemalloc.so")
-os.execute("export MALLOC_CONF='background_thread:true,narenas:2,dirty_decay_ms:15000,muzzy_decay_ms:15000'")
-
-local read_file = function(name)
-	local file = io.open("/home/flv/.config/waywall/" .. name, "r")
-	local data = file:read("*a")
-	file:close()
-
-	return data
-end
-
 local config = {
-	input = {
-		remaps = {
-			["7"] = "0",
-			["V"] = "Backspace",
-		},
-
-		layout = "mc",
-		variant = "basic",
-		repeat_rate = 50,
-		repeat_delay = 180,
-		sensitivity = 0.0625,
-		confine_pointer = false,
+    input = {
+	remaps = {
+	     ["7"] = "0",
+	     ["V"] = "Backspace",
+	     ["I"] = "V",
+	     ["O"] = "I" 
 	},
-	theme = {
-		background = "#333333",
-		ninb_anchor = "right",
-		ninb_opacity = 0.8,
-
-		cursor_icon = "",
-		cursor_theme = "",
-	},
-	shaders = {
-		["pie_chart"] = {
-			vertex = read_file("pie_chart.vert"),
-			fragment = read_file("pie_chart.frag"),
-		},
-	},
-
-	experimental = {
-		jit = true,
-		tearing = false,
-	},
+        layout = "mc",
+	variant = "basic",
+        repeat_rate = 20,
+	repeat_delay = 180,
+        sensitivity = 0.0625
+    },
+    theme = {
+        background = "#333333",
+	background_png = "/home/flv/.config/hypr/clouds.png", 	     
+	--ninb_anchor = "right",
+    },
+    experimental = {
+	       jit = true,
+	tearing = false,
+    }
 }
 
 -- State
@@ -67,76 +46,181 @@ local update_keymap_text = function()
 	end
 end
 
-waywall.listen("state", update_keymap_text)
+waywall.listen("state", update_keymap_text)local make_image = function(path, dst)
+    local this = nil
 
--- Eye magnifier
-helpers.res_mirror({
-	src = { x = 130, y = 7902, w = 60, h = 580 },
-	dst = { x = 0, y = 315, w = 800, h = 450 },
-}, 320, 16384)
-helpers.res_image("/home/flv/mcsr/overlay.png", {
-	dst = { x = 0, y = 315, w = 800, h = 450 },
-}, 320, 16384)
+    return function(enable)
+        if enable and not this then
+            this = waywall.image(path, {dst = dst})
+        elseif this and not enable then
+            this:close()
+            this = nil
+        end
+    end
+end
 
--- Tall pie
-helpers.res_mirror({
-	src = { x = 0, y = 15980, w = 320, h = 260 },
-	dst = { x = 800, y = 586, w = 320, h = 260 },
-}, 320, 16384)(
-	-- F3 Client Chunk Cache
-	[[helpers.res_mirror(
-    {
-        src = {x = 101,     y = 55,     w = 27,      h = 9},
-        dst = {x = 880,     y = 484,    w = 108,     h = 36},
-color_key  = {
+local make_mirror = function(options)
+    local this = nil 
+
+    return function(enable)
+        if enable and not this then
+            this = waywall.mirror(options)
+        elseif this and not enable then
+            this:close()
+            this = nil
+        end
+    end
+end
+
+local make_res = function(width, height, enable, disable)
+    return function()
+        local active_width, active_height = waywall.active_res()
+
+        if active_width == width and active_height == height then
+            waywall.set_resolution(0, 0)
+            disable()
+        else
+            waywall.set_resolution(width, height)
+            enable()
+        end
+    end
+end
+
+local mirrors = {
+    eye_measure = make_mirror({
+        src = {x = 130,     y = 7902,   w = 60,     h = 580},
+        dst = {x = 0,       y = 315,    w = 800,    h = 450},
+    }),
+    tall_pie = make_mirror({
+        src = {x = 0,       y = 15980,  w = 320,    h = 260},
+        dst = {x = 480,     y = 765,    w = 320,    h = 260},
+    }),
+
+    f3_ecount = make_mirror({
+        src = {x = 0,       y = 36,     w = 49,     h = 9},
+        dst = {x = 1120,    y = 540,    w = 196,    h = 36},
+        color_key  = {
             input  = "#dddddd",
-            output = "#ee1111",
+            output = "#ffffff",
         },
-    },
-    320, 900
-)]]
-)
+    }),
 
--- F3 Entity Count
-helpers.res_mirror({
-	src = { x = 0, y = 36, w = 49, h = 9 },
-	dst = { x = 537, y = 162, w = 254, h = 47 },
-	color_key = {
-		input = "#dddddd",
-		output = "#ffffff",
-	},
-}, 300, 1020)
+    tall_pie_entities = make_mirror({
+        src = {x = 226,     y = 16164,  w = 84,     h = 42},
+        dst = {x = 1120,    y = 650,    w = 504,    h = 252},
+        color_key  = {
+            input  = "#e145c2",
+            output = "#e145c2",
+        },
+    }),
+    tall_pie_blockentities = make_mirror({
+        src = {x = 226,     y = 16164,  w = 84,     h = 42},
+        dst = {x = 1120,    y = 650,    w = 504,    h = 252},
+        color_key  = {
+            input  = "#e96d4d",
+            output = "#e96d4d",
+        },
+    }),
+    tall_pie_unspec = make_mirror({
+        src = {x = 226,     y = 16164,  w = 84,    h = 42},
+        dst = {x = 1120,    y = 650,    w = 504,    h = 252},
+        color_key  = {
+            input  = "#45cb65",
+            output = "#45cb65",
+        },
+    }),
 
--- Tall pie numbers
-helpers.res_mirror({
-	src = { x = 227, y = 16163, w = 84, h = 42 },
-	dst = { x = 1120, y = 650, w = 504, h = 252 },
-	shader = "pie_chart",
-}, 320, 16384)
 
--- Thin pie numbers
-helpers.res_mirror({
-	src = { x = 1016, y = 828, w = 84, h = 42 },
-	dst = { x = 1120, y = 650, w = 504, h = 252 },
-	shader = "pie_chart",
-}, 300, 1020)
-
-local resolutions = {
-	thin = helpers.ingame_only(helpers.toggle_res(300, 1020)),
-	eye = helpers.toggle_res(320, 16384, 0.1),
-	tall = helpers.toggle_res(320, 1638),
-	wide = helpers.toggle_res(1920, 320),
+    thin_pie_entities = make_mirror({
+        src = {x = 205,     y = 859,    w = 84,     h = 42},
+        dst = {x = 1120,    y = 650,    w = 504,    h = 252},
+        color_key = {
+            input  = "#e145c2",
+            output = "#e145c2",
+        },
+    }),
+    thin_pie_blockentities = make_mirror({
+        src = {x = 205,     y = 859,    w = 84,     h = 42},
+        dst = {x = 1120,    y = 650,    w = 504,    h = 252},
+        color_key = {
+            input  = "#e96d4d",
+            output = "#e96d4d",
+        },
+    }),
+    thin_pie_unspec = make_mirror({
+        src = {x = 205,     y = 859,    w = 84,     h = 42},
+        dst = {x = 1120,    y = 650,    w = 504,    h = 252},
+        color_key = {
+            input  = "#45cb65",
+            output = "#45cb65",
+        },
+    }),
 }
 
--- Actions
-local atum_reset = function()
-	waywall.press_key("Backslash")
-	waywall.set_resolution(0, 0)
+local images = {
+    overlay = make_image(
+        "/home/flv/mcsr/overlay.png",
+        {x = 0, y = 315, w = 800, h = 450}
+    )
+}
+
+local show_mirrors = function(eye, f3, tall, thin, lowest)
+    images.overlay(eye)
+    mirrors.eye_measure(eye)
+    mirrors.tall_pie(eye)
+
+    mirrors.f3_ecount(f3)
+
+    mirrors.tall_pie_entities(tall)
+    mirrors.tall_pie_blockentities(tall)
+    mirrors.tall_pie_unspec(tall)
+
+    mirrors.thin_pie_entities(thin)
+    mirrors.thin_pie_blockentities(thin)
+    mirrors.thin_pie_unspec(thin)
+
 end
 
-local exec_ninb = function()
-	waywall.exec("java -jar /home/flv/mcsr/Ninjabrain-Bot-1.5.1.jar")
+local thin_enable = function()
+    waywall.set_sensitivity(0)
+    show_mirrors(false, true, false, true, false)
 end
+
+local thin_disable = function()
+    show_mirrors(false, false, false, false, false)
+end
+
+local tall_enable = function()
+    waywall.set_sensitivity(0.33)
+    show_mirrors(true, true, true, false, false)
+end
+
+local tall_disable = function()
+    waywall.set_sensitivity(0)
+    show_mirrors(false, false, false, false, false)
+end
+
+local wide_enable = function()
+    waywall.set_sensitivity(0)
+    show_mirrors(false, false, false, false, false)
+end
+
+local wide_disable = function()
+    -- nothing
+end
+
+
+local resolutions = {
+    thin            = make_res(300, 1080, thin_enable, thin_disable),
+    tall            = make_res(320, 16384, tall_enable, tall_disable),
+    wide            = make_res(1920, 300, wide_enable, wide_disable),
+
+}
+
+local exec_ninb = function()
+    waywall.exec("java -jar /home/flv/mcsr/Ninjabrain-Bot-1.5.1.jar")
+end
+
 
 local set_keymap = function(layout)
 	return function()
@@ -147,23 +231,18 @@ local set_keymap = function(layout)
 	end
 end
 
+
 config.actions = {
-	-- Resolutions
-	["*-Caps_Lock"] = resolutions.thin,
-	["Ctrl-V"] = resolutions.eye,
-	["*-Y"] = resolutions.wide,
-	["*-U"] = resolutions.tall,
-
-	-- Ninjabrain Bot
-	["*-H"] = helpers.ingame_only(helpers.toggle_floating),
-	["*-Alt-H"] = helpers.toggle_floating,
-	["Ctrl-K"] = exec_ninb,
-
-	-- Miscellaneous
-	["*-J"] = atum_reset,
-	["*-Ctrl-P"] = waywall.toggle_fullscreen,
-	["Comma"] = set_keymap("mc"),
-	["Period"] = set_keymap("us"),
+    ["*-Caps_Lock"]              = resolutions.thin,
+    ["*-J"]              = resolutions.tall,
+    ["*-Y"]          = resolutions.wide,
+    ["*-Alt-M"]          = resolutions.semithin,
+    ["*-U"]          = resolutions.lowest,
+    
+    ["*-Ctrl-P"]         = waywall.toggle_fullscreen,
+    ["*-Ctrl-H"]         = helpers.toggle_floating,
+    ["*-Ctrl-K"]         = exec_ninb, 
+    ["Comma"] = set_keymap("mc"),
+    ["Period"] = set_keymap("us"),
 }
-
 return config
